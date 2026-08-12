@@ -1,0 +1,931 @@
+﻿<Page x:Class="SchoolPlanner.Page.AdminPanelPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Панель управления"
+      Background="#F5F5F5">
+
+    <Page.Resources>
+        <!-- Стиль для карточки -->
+        <Style x:Key="CardStyle" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="15" Opacity="0.08" ShadowDepth="3"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль для кнопки -->
+        <Style x:Key="MainButtonStyle" TargetType="Button">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" 
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="8"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                            VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.85"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.75"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль для маленьких кнопок -->
+        <Style x:Key="SmallButtonStyle" TargetType="Button" BasedOn="{StaticResource MainButtonStyle}">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Padding" Value="8,5"/>
+        </Style>
+    </Page.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Верхняя панель -->
+        <Border Grid.Row="0" 
+                Style="{StaticResource CardStyle}" 
+                Margin="10"
+                Background="White">
+            <Grid Margin="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Button x:Name="btnBack" 
+                       Grid.Column="0"
+                       Content="← На главную" 
+                       Style="{StaticResource MainButtonStyle}"
+                       Background="#666666"
+                       Padding="15,8"
+                       Width="150"
+                       Click="btnBack_Click"/>
+
+                <TextBlock Grid.Column="1" 
+                          Text="Панель управления (УВР)" 
+                          FontSize="24" 
+                          FontWeight="Bold"
+                          Foreground="#2196F3"
+                          VerticalAlignment="Center"
+                          HorizontalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <!-- Основной контент -->
+        <TabControl Grid.Row="1" Margin="10" Background="White">
+
+            <!-- Вкладка Учителя -->
+            <TabItem Header="👨‍🏫 Учителя" Padding="10">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+                        <Button x:Name="btnAddTeacher" 
+                    Content="➕ Добавить учителя" 
+                    Style="{StaticResource MainButtonStyle}"
+                    Background="#4CAF50"
+                    Width="150"
+                    Click="btnAddTeacher_Click"/>
+
+                        <Button x:Name="btnRefreshTeachers" 
+                    Content="🔄" 
+                    Style="{StaticResource MainButtonStyle}"
+                    Background="#2196F3"
+                    Width="40"
+                    Margin="10,0,0,0"
+                    Click="btnRefreshTeachers_Click"/>
+                    </StackPanel>
+
+                    <ListView x:Name="lvTeachers" 
+                  Grid.Row="1"
+                  SelectionMode="Single"
+                  ScrollViewer.VerticalScrollBarVisibility="Auto"
+                  BorderThickness="1"
+                  BorderBrush="#E0E0E0">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="ID" Width="40" DisplayMemberBinding="{Binding Id}"/>
+                                <GridViewColumn Header="ФИО" Width="180" DisplayMemberBinding="{Binding FullName}"/>
+
+                                <!-- ✅ КОЛОНКА С ПРЕДМЕТАМИ ПО КЛАССАМ -->
+                                <GridViewColumn Header="📚 Предметы по классам" Width="300">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <ItemsControl ItemsSource="{Binding SubjectsByClass}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <WrapPanel />
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Background="#E3F2FD" 
+                                                    CornerRadius="8" 
+                                                    Padding="6,2" 
+                                                    Margin="2"
+                                                    BorderBrush="#90CAF9"
+                                                    BorderThickness="1">
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <TextBlock Text="{Binding ClassName}" 
+                                                               FontSize="11" 
+                                                               Foreground="#1565C0"
+                                                               FontWeight="SemiBold"/>
+                                                                <TextBlock Text=": " 
+                                                               FontSize="11" 
+                                                               Foreground="#1565C0"/>
+                                                                <TextBlock Text="{Binding Subjects}" 
+                                                               FontSize="11" 
+                                                               Foreground="#0D47A1"/>
+                                                            </StackPanel>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+
+                                <GridViewColumn Header="Логин" Width="100" DisplayMemberBinding="{Binding Username}"/>
+                                <GridViewColumn Header="Макс. часов" Width="70" DisplayMemberBinding="{Binding MaxHours}"/>
+                                <GridViewColumn Header="Кабинет" Width="70" DisplayMemberBinding="{Binding Room}"/>
+
+                                <!-- Действия -->
+                                <!-- Действия -->
+                                <GridViewColumn Header="Действия" Width="150">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Button Content="📚" 
+                        Width="30" 
+                        Margin="2"
+                        Background="#FF9800"
+                        Foreground="White"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        Tag="{Binding}"
+                        Click="btnShowTeacherSubjects_Click"
+                        ToolTip="Показать предметы"/>
+                                                <Button Content="✏" 
+                        Width="30" 
+                        Margin="2"
+                        Background="#2196F3"
+                        Foreground="White"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        Tag="{Binding}"
+                        Click="btnEditTeacher_Click"/>
+                                                <Button Content="❌" 
+                        Width="30" 
+                        Margin="2"
+                        Background="#F44336"
+                        Foreground="White"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        Tag="{Binding}"
+                        Click="btnDeleteTeacher_Click"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+
+                    <Border Grid.Row="2" 
+                Background="#F5F5F5" 
+                Padding="10" 
+                Margin="0,10,0,0"
+                CornerRadius="5">
+                        <TextBlock x:Name="txtTeacherStats" 
+                       Text="Всего учителей: 0"
+                       Foreground="#666666"/>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- ============================================================
+                 ВКЛАДКА: КАБИНЕТЫ
+                 ============================================================ -->
+            <TabItem Header="🚪 Кабинеты" Padding="10">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+                        <Button x:Name="btnAddRoom" 
+                                Content="➕ Добавить кабинет" 
+                                Style="{StaticResource MainButtonStyle}"
+                                Background="#4CAF50"
+                                Width="150"
+                                Click="btnAddRoom_Click"/>
+                    </StackPanel>
+
+                    <ListView x:Name="lvRooms" 
+                              Grid.Row="1"
+                              SelectionMode="Single"
+                              ScrollViewer.VerticalScrollBarVisibility="Auto"
+                              BorderThickness="1"
+                              BorderBrush="#E0E0E0">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="ID" Width="50" DisplayMemberBinding="{Binding Id}"/>
+                                <GridViewColumn Header="Номер кабинета" Width="120" DisplayMemberBinding="{Binding Number}"/>
+                                <GridViewColumn Header="Предмет" Width="150" DisplayMemberBinding="{Binding Subject}"/>
+                                <GridViewColumn Header="Ответственный учитель" Width="200" DisplayMemberBinding="{Binding TeacherName}"/>
+                                <GridViewColumn Header="Действия" Width="150">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Button Content="✏" 
+                                                        Width="30" 
+                                                        Margin="2"
+                                                        Background="#2196F3"
+                                                        Foreground="White"
+                                                        BorderThickness="0"
+                                                        Cursor="Hand"
+                                                        Tag="{Binding}"
+                                                        Click="btnEditRoom_Click"/>
+                                                <Button Content="❌" 
+                                                        Width="30" 
+                                                        Margin="2"
+                                                        Background="#F44336"
+                                                        Foreground="White"
+                                                        BorderThickness="0"
+                                                        Cursor="Hand"
+                                                        Tag="{Binding}"
+                                                        Click="btnDeleteRoom_Click"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+
+                    <Border Grid.Row="2" 
+                            Background="#F5F5F5" 
+                            Padding="10" 
+                            Margin="0,10,0,0"
+                            CornerRadius="5">
+                        <TextBlock x:Name="txtRoomStats" 
+                                   Text="Всего кабинетов: 0"
+                                   Foreground="#666666"/>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- ============================================================
+                 ВКЛАДКА: КЛАССЫ
+                 ============================================================ -->
+            <TabItem Header="🏫 Классы" Padding="10">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+                        <Button x:Name="btnAddClass" 
+                                Content="➕ Добавить класс" 
+                                Style="{StaticResource MainButtonStyle}"
+                                Background="#4CAF50"
+                                Width="150"
+                                Margin="0,0,10,0"
+                                Click="btnAddClass_Click"/>
+
+                        <Button x:Name="btnAddMultipleClasses" 
+                                Content="➕ Добавить несколько классов" 
+                                Style="{StaticResource MainButtonStyle}"
+                                Background="#2196F3"
+                                Width="240"
+                                Click="btnAddMultipleClasses_Click"/>
+                    </StackPanel>
+
+                    <ListView x:Name="lvClasses" 
+                              Grid.Row="1"
+                              SelectionMode="Single"
+                              ScrollViewer.VerticalScrollBarVisibility="Auto"
+                              BorderThickness="1"
+                              BorderBrush="#E0E0E0">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="ID" Width="50" DisplayMemberBinding="{Binding Id}"/>
+                                <GridViewColumn Header="Название класса" Width="120" DisplayMemberBinding="{Binding Name}"/>
+                                <GridViewColumn Header="Параллель" Width="80" DisplayMemberBinding="{Binding Grade}"/>
+                                <GridViewColumn Header="Кол-во учеников" Width="120" DisplayMemberBinding="{Binding StudentCount}"/>
+                                <GridViewColumn Header="Действия" Width="150">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Button Content="✏" 
+                                                        Width="30" 
+                                                        Margin="2"
+                                                        Background="#2196F3"
+                                                        Foreground="White"
+                                                        BorderThickness="0"
+                                                        Cursor="Hand"
+                                                        Tag="{Binding}"
+                                                        Click="btnEditClass_Click"/>
+                                                <Button Content="❌" 
+                                                        Width="30" 
+                                                        Margin="2"
+                                                        Background="#F44336"
+                                                        Foreground="White"
+                                                        BorderThickness="0"
+                                                        Cursor="Hand"
+                                                        Tag="{Binding}"
+                                                        Click="btnDeleteClass_Click"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+
+                    <Border Grid.Row="2" 
+                            Background="#F5F5F5" 
+                            Padding="10" 
+                            Margin="0,10,0,0"
+                            CornerRadius="5">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0" 
+                                       x:Name="txtClassStats" 
+                                       Text="Всего классов: 0"
+                                       Foreground="#666666"/>
+
+                            <TextBlock Grid.Column="1" 
+                                       x:Name="txtTotalStudents" 
+                                       Text="Всего учеников: 0"
+                                       Foreground="#666666"
+                                       HorizontalAlignment="Center"/>
+
+                            <TextBlock Grid.Column="2" 
+                                       x:Name="txtAvgStudents" 
+                                       Text="Среднее: 0"
+                                       Foreground="#666666"
+                                       HorizontalAlignment="Right"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- ============================================================
+                 ВКЛАДКА: УЧЕБНЫЕ ПЛАНЫ
+                 ============================================================ -->
+            <TabItem Header="📋 Учебные планы" Padding="10">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" 
+                            Background="#E3F2FD" 
+                            CornerRadius="8" 
+                            Padding="15" 
+                            Margin="0,0,0,15">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="📋 Учебные планы" 
+                                           FontSize="20" 
+                                           FontWeight="Bold" 
+                                           Foreground="#1565C0"/>
+                                <TextBlock Text="Управление предметами и часами для каждого класса" 
+                                           Foreground="#555555"
+                                           FontSize="12"
+                                           Margin="0,2,0,0"/>
+                                <TextBlock x:Name="txtLastUpdate" 
+                                           Text="Последнее обновление: только что" 
+                                           Foreground="#888888"
+                                           FontSize="11"
+                                           Margin="0,2,0,0"/>
+                            </StackPanel>
+
+                            <WrapPanel Grid.Column="1" Margin="10,0,0,0">
+                                <Button x:Name="btnAddPlan" 
+                                        Content="➕ Добавить план" 
+                                        Style="{StaticResource MainButtonStyle}"
+                                        Background="#4CAF50"
+                                        Padding="12,6"
+                                        Margin="0,0,5,0"
+                                        Click="btnAddPlan_Click"/>
+
+                                <Button x:Name="btnAddSubject" 
+                                        Content="➕ Предмет" 
+                                        Style="{StaticResource MainButtonStyle}"
+                                        Background="#FF9800"
+                                        Padding="12,6"
+                                        Margin="0,0,5,0"
+                                        Click="btnAddSubject_Click"/>
+
+                                <Button x:Name="btnDeleteSubject" 
+                                        Content="🗑 Удалить предмет" 
+                                        Style="{StaticResource MainButtonStyle}"
+                                        Background="#F44336"
+                                        Padding="12,6"
+                                        Margin="0,0,5,0"
+                                        Click="btnDeleteSubject_Click"/>
+
+                                <Button x:Name="btnDeletePlan" 
+                                        Content="🗑 Удалить план" 
+                                        Style="{StaticResource MainButtonStyle}"
+                                        Background="#D32F2F"
+                                        Padding="12,6"
+                                        Margin="0,0,5,0"
+                                        Click="btnDeletePlan_Click"/>
+
+                                <Button x:Name="btnExportPlan" 
+                                        Content="📤 Экспорт" 
+                                        Style="{StaticResource MainButtonStyle}"
+                                        Background="#9C27B0"
+                                        Padding="12,6"
+                                        Margin="0,0,5,0"
+                                        Click="btnExportPlan_Click"/>
+
+                                <Button x:Name="btnRefreshPlans" 
+                                        Content="🔄" 
+                                        Style="{StaticResource MainButtonStyle}"
+                                        Background="#2196F3"
+                                        Padding="10,6"
+                                        Width="40"
+                                        Click="btnRefreshPlans_Click"/>
+                            </WrapPanel>
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Row="1" 
+                            Background="White" 
+                            CornerRadius="8" 
+                            BorderBrush="#E0E0E0" 
+                            BorderThickness="1">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                            <DataGrid x:Name="dgStudyPlans" 
+                                      AutoGenerateColumns="False"
+                                      HeadersVisibility="Column"
+                                      GridLinesVisibility="Horizontal"
+                                      BorderBrush="#E0E0E0"
+                                      BorderThickness="0"
+                                      Background="White"
+                                      RowHeight="32"
+                                      FontSize="12"
+                                      SelectionMode="Extended"
+                                      CanUserAddRows="False"
+                                      CanUserDeleteRows="False"
+                                      AlternatingRowBackground="#F8F9FA"
+                                      RowHeaderWidth="0"
+                                      VerticalGridLinesBrush="#E8E8E8"
+                                      HorizontalGridLinesBrush="#E8E8E8">
+                                <DataGrid.Resources>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="Background" Value="#1976D2"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                        <Setter Property="Height" Value="38"/>
+                                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                        <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                        <Setter Property="FontSize" Value="12"/>
+                                        <Setter Property="BorderBrush" Value="#1565C0"/>
+                                        <Setter Property="BorderThickness" Value="0,0,1,0"/>
+                                    </Style>
+                                    <Style TargetType="DataGridCell">
+                                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                        <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                        <Setter Property="Padding" Value="3"/>
+                                        <Setter Property="FontSize" Value="12"/>
+                                    </Style>
+                                    <Style TargetType="DataGridRow">
+                                        <Setter Property="Height" Value="32"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#E3F2FD"/>
+                                            </Trigger>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter Property="Background" Value="#BBDEFB"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGrid.Resources>
+                            </DataGrid>
+                        </ScrollViewer>
+                    </Border>
+
+                    <Border Grid.Row="2" 
+                            Background="#F5F5F5" 
+                            Padding="12" 
+                            CornerRadius="8"
+                            Margin="0,10,0,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                <TextBlock Text="📊 " FontSize="16" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="txtPlanStats" 
+                                           Text="Всего предметов: 0 | Всего классов: 0 | Всего часов: 0"
+                                           Foreground="#555555"
+                                           VerticalAlignment="Center"
+                                           FontSize="12"/>
+                            </StackPanel>
+
+                            <Button x:Name="btnSavePlans" 
+                                    Grid.Column="1"
+                                    Content="💾 Сохранить изменения" 
+                                    Style="{StaticResource MainButtonStyle}"
+                                    Background="#4CAF50"
+                                    Padding="12,6"
+                                    Width="160"
+                                    Click="btnSavePlans_Click"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- ============================================================
+                 ВКЛАДКА: ШКАЛА ТРУДНОСТИ
+                 ============================================================ -->
+            <TabItem Header="📊 Шкала трудности" Padding="10">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Margin="0,0,0,15">
+                        <TextBlock Text="Шкала трудности учебных предметов" 
+                                   FontSize="18" 
+                                   FontWeight="Bold" 
+                                   Foreground="#2196F3"
+                                   Margin="0,0,0,5"/>
+                        <TextBlock Text="Редактирование баллов трудности для каждого предмета по классам" 
+                                   Foreground="#666666"
+                                   FontSize="12"/>
+                    </StackPanel>
+
+                    <DataGrid x:Name="dgDifficulty" 
+                              Grid.Row="1"
+                              AutoGenerateColumns="False"
+                              HeadersVisibility="Column"
+                              GridLinesVisibility="Horizontal"
+                              BorderBrush="#E0E0E0"
+                              BorderThickness="1"
+                              Background="White"
+                              RowHeight="35"
+                              FontSize="13"
+                              SelectionMode="Single"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              Margin="0,0,0,10">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Предмет" 
+                                                Width="200" 
+                                                Binding="{Binding SubjectName}"
+                                                IsReadOnly="True"
+                                                FontWeight="SemiBold"/>
+                            <DataGridTextColumn Header="5 кл" Width="70" Binding="{Binding Grade5}"/>
+                            <DataGridTextColumn Header="6 кл" Width="70" Binding="{Binding Grade6}"/>
+                            <DataGridTextColumn Header="7 кл" Width="70" Binding="{Binding Grade7}"/>
+                            <DataGridTextColumn Header="8 кл" Width="70" Binding="{Binding Grade8}"/>
+                            <DataGridTextColumn Header="9 кл" Width="70" Binding="{Binding Grade9}"/>
+                            <DataGridTextColumn Header="10 кл" Width="70" Binding="{Binding Grade10}"/>
+                            <DataGridTextColumn Header="11 кл" Width="70" Binding="{Binding Grade11}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <Border Grid.Row="2" 
+                            Background="#F5F5F5" 
+                            Padding="15" 
+                            CornerRadius="5">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                <TextBlock Text="⚠️ " Foreground="#FF9800" FontSize="16" VerticalAlignment="Center"/>
+                                <TextBlock TextWrapping="Wrap" Foreground="#666666" VerticalAlignment="Center">
+                                    Более высокий балл означает большую сложность предмета.
+                                </TextBlock>
+                            </StackPanel>
+
+                            <Button x:Name="btnSaveDifficulty" 
+                                    Grid.Column="1"
+                                    Content="💾 Сохранить изменения" 
+                                    Style="{StaticResource MainButtonStyle}"
+                                    Background="#4CAF50"
+                                    Padding="15,8"
+                                    Width="180"
+                                    Margin="0,0,10,0"
+                                    Click="btnSaveDifficulty_Click"/>
+
+                            <Button x:Name="btnRefreshDifficulty" 
+                                    Grid.Column="2"
+                                    Content="🔄 Обновить" 
+                                    Style="{StaticResource MainButtonStyle}"
+                                    Background="#2196F3"
+                                    Padding="15,8"
+                                    Width="120"
+                                    Click="btnRefreshDifficulty_Click"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- ============================================================
+     ВКЛАДКА: ГРАФИК РАБОТЫ
+     ============================================================ -->
+            <TabItem Header="📅 График работы" Padding="10">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" 
+                Background="#FFF3E0" 
+                CornerRadius="8" 
+                Padding="15" 
+                Margin="0,0,0,15">
+                        <StackPanel>
+                            <TextBlock Text="📅 График работы учителей" 
+                           FontSize="20" 
+                           FontWeight="Bold" 
+                           Foreground="#E65100"/>
+                            <TextBlock Text="Укажите дни, когда учитель НЕ работает (выходные)." 
+                           Foreground="#555555"
+                           FontSize="12"
+                           Margin="0,2,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- DataGrid с чекбоксами -->
+                    <Border Grid.Row="1" 
+                Background="White" 
+                CornerRadius="8" 
+                BorderBrush="#E0E0E0" 
+                BorderThickness="1"
+                Padding="5">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                            <DataGrid x:Name="dgTeacherSchedule" 
+                          AutoGenerateColumns="False"
+                          HeadersVisibility="Column"
+                          GridLinesVisibility="Horizontal"
+                          BorderBrush="#E0E0E0"
+                          BorderThickness="0"
+                          Background="White"
+                          RowHeight="35"
+                          FontSize="13"
+                          SelectionMode="Single"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          AlternatingRowBackground="#F8F9FA"
+                          RowHeaderWidth="0">
+                                <DataGrid.Resources>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="Background" Value="#E65100"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                        <Setter Property="Height" Value="38"/>
+                                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                        <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                        <Setter Property="FontSize" Value="12"/>
+                                        <Setter Property="BorderBrush" Value="#BF360C"/>
+                                        <Setter Property="BorderThickness" Value="0,0,1,0"/>
+                                    </Style>
+                                    <Style TargetType="DataGridCell">
+                                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                        <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                        <Setter Property="Padding" Value="3"/>
+                                        <Setter Property="FontSize" Value="12"/>
+                                    </Style>
+                                    <Style TargetType="DataGridRow">
+                                        <Setter Property="Height" Value="35"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#FFF3E0"/>
+                                            </Trigger>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter Property="Background" Value="#FFE0B2"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGrid.Resources>
+
+                                <DataGrid.Columns>
+                                    <!-- Учитель -->
+                                    <DataGridTextColumn Header="👨‍🏫 Учитель" 
+                                            Binding="{Binding FullName}" 
+                                            Width="220"
+                                            IsReadOnly="True">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                                <Setter Property="Padding" Value="10,0,0,0"/>
+                                                <Setter Property="FontSize" Value="13"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+
+                                    <!-- Понедельник -->
+                                    <DataGridCheckBoxColumn Header="Пн" Width="65">
+                                        <DataGridCheckBoxColumn.ElementStyle>
+                                            <Style TargetType="CheckBox">
+                                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                                <Setter Property="IsChecked" Value="{Binding Monday, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                            </Style>
+                                        </DataGridCheckBoxColumn.ElementStyle>
+                                        <DataGridCheckBoxColumn.EditingElementStyle>
+                                            <Style TargetType="CheckBox">
+                                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                                <Setter Property="IsChecked" Value="{Binding Monday, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                            </Style>
+                                        </DataGridCheckBoxColumn.EditingElementStyle>
+                                    </DataGridCheckBoxColumn>
+
+                                    <!-- Вторник -->
+                                    <DataGridCheckBoxColumn Header="Вт" Width="65">
+                                        <DataGridCheckBoxColumn.ElementStyle>
+                                            <Style TargetType="CheckBox">
+                                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                                <Setter Property="IsChecked" Value="{Binding Tuesday, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                            </Style>
+                                        </DataGridCheckBoxColumn.ElementStyle>
+                                        <DataGridCheckBoxColumn.EditingElementStyle>
+                                            <Style TargetType="CheckBox">
+                                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                                <Setter Property="IsChecked" Value="{Binding Tuesday, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                            </Style>
+                                        </DataGridCheckBoxColumn.EditingElementStyle>
+                                    </DataGridCheckBoxColumn>
+
+                                    <!-- Среда -->
+                                    <DataGridCheckBoxColumn Header="Ср" Width="65">
+                                        <DataGridCheckBoxColumn.ElementStyle>
+                                            <Style TargetType="CheckBox">
+                                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                                <Setter Property="IsChecked" Value="{Binding Wednesday, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                            </Style>
+                                        </DataGridCheckBoxColumn.ElementStyle>
+                                        <DataGridCheckBoxColumn.EditingElementStyle>
+                                            <Style TargetType="CheckBox">
+                                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                                <Setter Property="IsChecked" Value="{Binding Wednesday, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                            </Style>
+                                        </DataGridCheckBoxColumn.EditingElementStyle>
+                                    </DataGridCheckBoxColumn>
+
+                                    <!-- Четверг -->
+                                    <DataGridCheckBoxColumn Header="Чт" Width="65">
+                                        <DataGridCheckBoxColumn.ElementStyle>
+                                            <Style TargetType="CheckBox">
+                                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                                <Setter Property="IsChecked" Value="{Binding Thursday, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                            </Style>
+                                        </DataGridCheckBoxColumn.ElementStyle>
+                                        <DataGridCheckBoxColumn.EditingElementStyle>
+                                            <Style TargetType="CheckBox">
+                                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                                <Setter Property="IsChecked" Value="{Binding Thursday, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                            </Style>
+                                        </DataGridCheckBoxColumn.EditingElementStyle>
+                                    </DataGridCheckBoxColumn>
+
+                                    <!-- Пятница -->
+                                    <DataGridCheckBoxColumn Header="Пт" Width="65">
+                                        <DataGridCheckBoxColumn.ElementStyle>
+                                            <Style TargetType="CheckBox">
+                                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                                <Setter Property="IsChecked" Value="{Binding Friday, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                            </Style>
+                                        </DataGridCheckBoxColumn.ElementStyle>
+                                        <DataGridCheckBoxColumn.EditingElementStyle>
+                                            <Style TargetType="CheckBox">
+                                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                                <Setter Property="IsChecked" Value="{Binding Friday, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                            </Style>
+                                        </DataGridCheckBoxColumn.EditingElementStyle>
+                                    </DataGridCheckBoxColumn>
+
+                                    <!-- Выходные (отображение) -->
+                                    <DataGridTextColumn Header="📆 Выходные" 
+                                            Binding="{Binding DaysOff}" 
+                                            Width="180"
+                                            IsReadOnly="True">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                                <Setter Property="Padding" Value="5,0,0,0"/>
+                                                <Setter Property="Foreground" Value="#F44336"/>
+                                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                                <Setter Property="FontSize" Value="12"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </ScrollViewer>
+                    </Border>
+
+                    <!-- Нижняя панель -->
+                    <Border Grid.Row="2" 
+                Background="#F5F5F5" 
+                Padding="12" 
+                CornerRadius="8"
+                Margin="0,10,0,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                <TextBlock Text="💡 " FontSize="16" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="txtScheduleStats" 
+                               Text="Отметьте дни, когда учитель не работает"
+                               Foreground="#555555"
+                               VerticalAlignment="Center"
+                               FontSize="12"/>
+                            </StackPanel>
+
+                            <Button x:Name="btnRefreshTeacherSchedule" 
+                        Grid.Column="1"
+                        Content="🔄 Обновить" 
+                        Style="{StaticResource MainButtonStyle}"
+                        Background="#2196F3"
+                        Padding="12,6"
+                        Width="120"
+                        Margin="0,0,10,0"
+                        Click="btnRefreshTeacherSchedule_Click"/>
+
+                            <Button x:Name="btnSaveTeacherSchedule" 
+                        Grid.Column="2"
+                        Content="💾 Сохранить" 
+                        Style="{StaticResource MainButtonStyle}"
+                        Background="#4CAF50"
+                        Padding="12,6"
+                        Width="120"
+                        Click="btnSaveTeacherSchedule_Click"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+        </TabControl>
+    </Grid>
+</Page>

@@ -1,0 +1,142 @@
+﻿<Window x:Class="SchoolPlanner.TeacherLoadReportWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Отчет по нагрузке учителей" 
+        Height="600" 
+        Width="800"
+        WindowStartupLocation="CenterOwner"
+        Background="#F5F5F5"
+    
+        ResizeMode="CanResize" Icon="/log.png">
+
+    <Window.Resources>
+        <!-- Стили для окна (можно скопировать из основного приложения) -->
+        <Style x:Key="CardStyle" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#E0E0E0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="10" Opacity="0.1" ShadowDepth="2"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="MainButtonStyle" TargetType="Button">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" 
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                            VerticalAlignment="Center"
+                                            Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Верхняя панель -->
+        <Border Grid.Row="0" 
+                Style="{StaticResource CardStyle}" 
+                Background="White"
+                Margin="0,0,0,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Отчет по нагрузке учителей" 
+                          FontSize="20" 
+                          FontWeight="Bold" 
+                          Foreground="#F44336"
+                          Margin="15,10"/>
+                <Button x:Name="btnExport" 
+                        Grid.Column="1"
+                        Content="📤 Экспорт в CSV" 
+                        Style="{StaticResource MainButtonStyle}"
+                        Background="#4CAF50"
+                        Padding="15,8"
+                        Margin="0,5,15,5"
+                        Width="150"
+                        Click="btnExport_Click"/>
+            </Grid>
+        </Border>
+
+        <!-- Таблица с данными -->
+        <DataGrid x:Name="dgTeacherLoad" 
+                  Grid.Row="1"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True"
+                  HeadersVisibility="Column"
+                  GridLinesVisibility="Horizontal"
+                  BorderBrush="#E0E0E0"
+                  BorderThickness="1"
+                  Background="White"
+                  RowHeight="35"
+                  FontSize="13"
+                  SelectionMode="Single">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="№" Width="50" Binding="{Binding Number}"/>
+                <DataGridTextColumn Header="ФИО Учителя" Width="250" Binding="{Binding TeacherName}"/>
+                <DataGridTextColumn Header="Предмет" Width="150" Binding="{Binding Subject}"/>
+                <DataGridTextColumn Header="Всего уроков" Width="120" Binding="{Binding TotalLessons}">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="FontWeight" Value="Bold"/>
+                            <Setter Property="Foreground" Value="#2196F3"/>
+                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="Макс. часов" Width="100" Binding="{Binding MaxHours}"/>
+                <DataGridTextColumn Header="Загрузка, %" Width="100" Binding="{Binding LoadPercent, StringFormat={}{0}%}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Нижняя панель с итогами и кнопкой -->
+        <Border Grid.Row="2" 
+                Style="{StaticResource CardStyle}" 
+                Background="White"
+                Margin="0,10,0,0">
+            <Grid Margin="15,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <TextBlock Text="Всего учителей: " Foreground="#666666"/>
+                    <TextBlock x:Name="txtTotalTeachers" Text="0" Foreground="#2196F3" FontWeight="Bold" Margin="0,0,20,0"/>
+                    <TextBlock Text="Всего уроков: " Foreground="#666666"/>
+                    <TextBlock x:Name="txtTotalLessons" Text="0" Foreground="#F44336" FontWeight="Bold"/>
+                </StackPanel>
+                <Button Grid.Column="1" 
+                        Content="Закрыть" 
+                        Style="{StaticResource MainButtonStyle}"
+                        Background="#666666"
+                        Padding="30,8"
+                        Width="120"
+                        Click="btnClose_Click"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

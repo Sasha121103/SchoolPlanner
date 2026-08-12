@@ -1,0 +1,328 @@
+﻿<Page x:Class="SchoolPlanner.Pages.FgosFilesPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Файлы ФГОС"
+      Background="#F5F5F5">
+
+    <Page.Resources>
+        <!-- Стиль для кнопок с закругленными углами -->
+        <Style x:Key="RoundedButtonStyle" TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" 
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="5"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                            VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль для маленьких круглых кнопок -->
+        <Style x:Key="SmallRoundButtonStyle" TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" 
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="15"
+                                Width="{TemplateBinding Width}"
+                                Height="{TemplateBinding Height}">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                            VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Page.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Верхняя панель -->
+        <Border Grid.Row="0" 
+                Style="{StaticResource CardStyle}" 
+                Margin="10"
+                Background="White">
+            <Grid Margin="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Button x:Name="btnBack" 
+                       Grid.Column="0"
+                       Content="← На главную" 
+                       Style="{StaticResource MainButtonStyle}"
+                       Background="#666666"
+                       Padding="15,8"
+                       Width="150"
+                       Click="btnBack_Click"/>
+
+                <TextBlock Grid.Column="1" 
+                          Text="Управление файлами ФГОС" 
+                          FontSize="24" 
+                          FontWeight="Bold"
+                          Foreground="#2196F3"
+                          VerticalAlignment="Center"
+                          HorizontalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <!-- Основной контент -->
+        <Grid Grid.Row="1" Margin="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="250"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Левая панель - фильтры и управление -->
+            <Border Grid.Column="0" 
+                    Style="{StaticResource CardStyle}" 
+                    Margin="0,0,10,0"
+                    Background="White">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="15">
+                        <TextBlock Text="Фильтры" 
+                                  FontSize="18" 
+                                  FontWeight="Bold" 
+                                  Foreground="#2196F3"
+                                  Margin="0,0,0,15"/>
+
+                        <TextBlock Text="Предмет" Foreground="#666666" Margin="0,0,0,5"/>
+                        <ComboBox x:Name="cmbSubjectFilter" 
+                                 Padding="10"
+                                 Margin="0,0,0,15"
+                                 SelectionChanged="cmbSubjectFilter_SelectionChanged"/>
+
+                        <TextBlock Text="Класс" Foreground="#666666" Margin="0,0,0,5"/>
+                        <ComboBox x:Name="cmbGradeFilter" 
+                                 Padding="10"
+                                 Margin="0,0,0,15"
+                                 SelectionChanged="cmbGradeFilter_SelectionChanged">
+                            <ComboBoxItem Content="Все классы"/>
+                            <ComboBoxItem Content="5"/>
+                            <ComboBoxItem Content="6"/>
+                            <ComboBoxItem Content="7"/>
+                            <ComboBoxItem Content="8"/>
+                            <ComboBoxItem Content="9"/>
+                            <ComboBoxItem Content="10"/>
+                            <ComboBoxItem Content="11"/>
+                        </ComboBox>
+
+                        <Border Height="1" Background="#E0E0E0" Margin="0,0,0,15"/>
+
+                        <TextBlock Text="Управление" 
+                                  FontSize="16" 
+                                  FontWeight="Bold" 
+                                  Foreground="#F44336"
+                                  Margin="0,0,0,15"/>
+
+                        <Button x:Name="btnAddFile" 
+                               Content="➕ Добавить файл" 
+                               Style="{StaticResource RoundedButtonStyle}"
+                               Background="#4CAF50"
+                               Foreground="White"
+                               BorderThickness="0"
+                               Padding="15,10"
+                               Margin="0,0,0,10"
+                               Click="btnAddFile_Click"/>
+
+                        <!-- Статистика -->
+                        <Border Background="#F5F5F5" Padding="15" CornerRadius="5" Margin="0,15,0,0">
+                            <StackPanel>
+                                <TextBlock Text="Статистика" 
+                                          FontWeight="SemiBold" 
+                                          Foreground="#2196F3"
+                                          Margin="0,0,0,10"/>
+                                <TextBlock x:Name="txtFileCount" 
+                                          Text="Всего файлов: 0"
+                                          Foreground="#666666"
+                                          Margin="0,0,0,5"/>
+                                <TextBlock x:Name="txtTotalSize" 
+                                          Text="Общий размер: 0 МБ"
+                                          Foreground="#666666"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+
+            <!-- Правая панель - список файлов -->
+            <Border Grid.Column="1" 
+                    Style="{StaticResource CardStyle}" 
+                    Background="White">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Заголовок -->
+                    <TextBlock Grid.Row="0" 
+                              Text="Список файлов ФГОС" 
+                              FontSize="18" 
+                              FontWeight="Bold" 
+                              Foreground="#2196F3"
+                              Margin="15,15,15,10"/>
+
+                    <!-- Список файлов -->
+                    <ListView x:Name="lvFgosFiles" 
+                             Grid.Row="1"
+                             Margin="15,0,15,15"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto"
+                             BorderThickness="1"
+                             BorderBrush="#E0E0E0">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="#E0E0E0" 
+                                        BorderThickness="0,0,0,1" 
+                                        Padding="15">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Иконка -->
+                                        <Border Grid.Column="0"
+                                                Background="#E3F2FD"
+                                                CornerRadius="5"
+                                                Width="40"
+                                                Height="40"
+                                                Margin="0,0,15,0">
+                                            <TextBlock Text="📄" 
+                                                      FontSize="24"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
+                                        </Border>
+
+                                        <!-- Информация о файле -->
+                                        <StackPanel Grid.Column="1">
+                                            <TextBlock Text="{Binding FileName}" 
+                                                      FontWeight="SemiBold"
+                                                      FontSize="14"/>
+
+                                            <StackPanel Orientation="Horizontal" Margin="0,5">
+                                                <TextBlock Text="{Binding SubjectName}" 
+                                                          Foreground="#2196F3"
+                                                          FontSize="12"/>
+                                                <TextBlock Text=" • " 
+                                                          Foreground="#666666"
+                                                          FontSize="12"/>
+                                                <TextBlock Text="{Binding GradeLevel}" 
+                                                          Foreground="#4CAF50"
+                                                          FontSize="12"/>
+                                                <TextBlock Text=" • " 
+                                                          Foreground="#666666"
+                                                          FontSize="12"/>
+                                                <TextBlock Text="{Binding Variant}" 
+                                                          Foreground="#FF9800"
+                                                          FontSize="12"/>
+                                                <TextBlock Text=" • " 
+                                                          Foreground="#666666"
+                                                          FontSize="12"/>
+                                                <TextBlock Text="{Binding FileSizeString}" 
+                                                          Foreground="#666666"
+                                                          FontSize="12"/>
+                                            </StackPanel>
+
+                                            <TextBlock Text="{Binding Description}" 
+                                                      Foreground="#666666"
+                                                      FontSize="12"
+                                                      TextWrapping="Wrap"
+                                                      MaxHeight="40"/>
+
+                                            <StackPanel Orientation="Horizontal" Margin="0,5">
+                                                <TextBlock Text="Загружено: " 
+                                                          Foreground="#999999"
+                                                          FontSize="11"/>
+                                                <TextBlock Text="{Binding UploadedByName}" 
+                                                          Foreground="#2196F3"
+                                                          FontSize="11"/>
+                                                <TextBlock Text=" • " 
+                                                          Foreground="#999999"
+                                                          FontSize="11"/>
+                                                <TextBlock Text="{Binding UploadDate, StringFormat='dd.MM.yyyy'}" 
+                                                          Foreground="#999999"
+                                                          FontSize="11"/>
+                                                <TextBlock Text=" • " 
+                                                          Foreground="#999999"
+                                                          FontSize="11"/>
+                                                <TextBlock Text="Скачиваний: " 
+                                                          Foreground="#999999"
+                                                          FontSize="11"/>
+                                                <TextBlock Text="{Binding DownloadCount}" 
+                                                          Foreground="#FF9800"
+                                                          FontSize="11"/>
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                        <!-- Кнопки действий -->
+                                        <StackPanel Grid.Column="2" 
+                                                    Orientation="Horizontal"
+                                                    VerticalAlignment="Center">
+                                            <Button Content="📥" 
+                                                    Width="35"
+                                                    Height="35"
+                                                    Margin="0,0,5,0"
+                                                    Background="#2196F3"
+                                                    Foreground="White"
+                                                    BorderThickness="0"
+                                                    Style="{StaticResource SmallRoundButtonStyle}"
+                                                    Tag="{Binding}"
+                                                    ToolTip="Скачать"
+                                                    Click="btnDownloadFile_Click"/>
+                                            <Button Content="❌" 
+                                                    Width="35"
+                                                    Height="35"
+                                                    Background="#F44336"
+                                                    Foreground="White"
+                                                    BorderThickness="0"
+                                                    Style="{StaticResource SmallRoundButtonStyle}"
+                                                    Tag="{Binding}"
+                                                    ToolTip="Удалить"
+                                                    Click="btnDeleteFile_Click"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+
+                    <!-- Сообщение, если нет файлов -->
+                    <TextBlock x:Name="txtNoFiles" 
+                              Grid.Row="1"
+                              Text="Нет загруженных файлов"
+                              FontSize="16"
+                              Foreground="#999999"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center"
+                              Margin="15"
+                              Visibility="Collapsed"/>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Page>

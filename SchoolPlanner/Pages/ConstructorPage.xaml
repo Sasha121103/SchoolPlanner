@@ -1,0 +1,925 @@
+﻿<Page x:Class="SchoolPlanner.Pages.ConstructorPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:local="clr-namespace:SchoolPlanner.Pages"
+      mc:Ignorable="d"
+      Title="Конструктор уроков"
+      Background="#F0F2F5"
+      Loaded="Page_Loaded"
+      d:DesignHeight="800" d:DesignWidth="1200">
+
+    <Page.Resources>
+        <!-- Конвертеры для статусов -->
+        <local:StatusToColorConverter x:Key="StatusToColorConverter"/>
+        <local:StatusToTextConverter x:Key="StatusToTextConverter"/>
+
+        <!-- Цвета -->
+        <SolidColorBrush x:Key="PrimaryColor" Color="#1976D2"/>
+        <SolidColorBrush x:Key="PrimaryLightColor" Color="#E3F2FD"/>
+        <SolidColorBrush x:Key="SuccessColor" Color="#4CAF50"/>
+        <SolidColorBrush x:Key="WarningColor" Color="#FF9800"/>
+        <SolidColorBrush x:Key="DangerColor" Color="#F44336"/>
+        <SolidColorBrush x:Key="PurpleColor" Color="#9C27B0"/>
+        <SolidColorBrush x:Key="TextPrimaryColor" Color="#212121"/>
+        <SolidColorBrush x:Key="TextSecondaryColor" Color="#757575"/>
+
+        <!-- Стиль для карточки -->
+        <Style x:Key="CardStyle" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="15" Opacity="0.08" ShadowDepth="3"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль для основной кнопки -->
+        <Style x:Key="MainButtonStyle" TargetType="Button">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" 
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="8"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                            VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.85"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.75"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль для статус-бейджа -->
+        <Style x:Key="StatusBadgeStyle" TargetType="Border">
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="10,4"/>
+        </Style>
+
+        <!-- Шаблон для элемента списка планов -->
+        <DataTemplate x:Key="LessonPlanItemTemplate">
+            <Border BorderBrush="#F0F0F0" 
+                    BorderThickness="0,0,0,1" 
+                    Padding="12,10"
+                    Background="Transparent"
+                    Cursor="Hand">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel>
+                        <TextBlock Text="{Binding Title}" 
+                                  FontWeight="SemiBold"
+                                  FontSize="14"
+                                  TextWrapping="Wrap"
+                                  Foreground="#212121"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                            <TextBlock Text="{Binding Subject}" 
+                                      Foreground="#1976D2"
+                                      FontSize="12"/>
+                            <TextBlock Text=" · " Foreground="#BDBDBD" FontSize="12"/>
+                            <TextBlock Text="{Binding Class}" 
+                                      Foreground="#757575"
+                                      FontSize="12"/>
+                            <TextBlock Text=" · " Foreground="#BDBDBD" FontSize="12"/>
+                            <TextBlock Text="{Binding CreatedDate, StringFormat='dd.MM.yyyy'}" 
+                                      Foreground="#757575"
+                                      FontSize="12"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <Border Grid.Column="1" 
+                            Style="{StaticResource StatusBadgeStyle}"
+                            Background="{Binding Status, Converter={StaticResource StatusToColorConverter}}"
+                            VerticalAlignment="Center"
+                            Margin="10,0,0,0">
+                        <TextBlock Text="{Binding Status, Converter={StaticResource StatusToTextConverter}}"
+                                  FontSize="11"
+                                  Foreground="White"
+                                  FontWeight="SemiBold"/>
+                    </Border>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </Page.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Верхняя панель -->
+        <Border Grid.Row="0" 
+                Style="{StaticResource CardStyle}" 
+                Margin="12" 
+                Padding="16,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Column="0" 
+                       Content="← На главную" 
+                       Style="{StaticResource MainButtonStyle}"
+                       Background="#78909C"
+                       Padding="16,10"
+                       Width="140"
+                       Click="btnBack_Click"/>
+
+                <TextBlock Grid.Column="1" 
+                          Text="📝 Конструктор уроков" 
+                          FontSize="22" 
+                          FontWeight="Bold"
+                          Foreground="#1976D2"
+                          VerticalAlignment="Center"
+                          HorizontalAlignment="Center"/>
+
+                <Border Grid.Column="2"
+                        Background="#E3F2FD"
+                        CornerRadius="8"
+                        Padding="12,6"
+                        VerticalAlignment="Center">
+                    <TextBlock x:Name="txtRoleIndicator" 
+                               Text="👤 Учитель" 
+                               Foreground="#1976D2"
+                               FontWeight="SemiBold"
+                               FontSize="13"/>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- Основной контент -->
+        <Grid Grid.Row="1" Margin="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="320"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Левая панель -->
+            <Border Grid.Column="0" 
+                    Style="{StaticResource CardStyle}" 
+                    Background="White"
+                    Padding="0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" 
+                            Background="#F8F9FA"
+                            BorderBrush="#F0F0F0"
+                            BorderThickness="0,0,0,1"
+                            Padding="16,16">
+                        <StackPanel>
+                            <TextBlock Text="📋 Мои планы" 
+                                      FontSize="18" 
+                                      FontWeight="Bold" 
+                                      Foreground="#212121"
+                                      Margin="0,0,0,12"/>
+
+                            <Button x:Name="btnNewPlan" 
+                                   Content="➕ Создать план"
+                                   Style="{StaticResource MainButtonStyle}"
+                                   Background="#4CAF50"
+                                   Padding="16,10"
+                                   HorizontalAlignment="Stretch"
+                                   Click="btnNewPlan_Click"/>
+
+                            <ComboBox x:Name="cmbFilter" 
+                                     Margin="0,12,0,0"
+                                     Padding="12,10"
+                                     SelectedIndex="0"
+                                     SelectionChanged="cmbFilter_SelectionChanged">
+                                <ComboBoxItem Content="📌 Все планы"/>
+                                <ComboBoxItem Content="📄 Черновики"/>
+                                <ComboBoxItem Content="🔄 На проверке"/>
+                                <ComboBoxItem Content="✅ Утверждено"/>
+                                <ComboBoxItem Content="⚠️ Требуют доработки"/>
+                            </ComboBox>
+                        </StackPanel>
+                    </Border>
+
+                    <ListView x:Name="lvLessonPlans" 
+                             Grid.Row="1"
+                             SelectionMode="Single"
+                             ItemTemplate="{StaticResource LessonPlanItemTemplate}"
+                             SelectionChanged="lvLessonPlans_SelectionChanged"/>
+                </Grid>
+            </Border>
+
+            <!-- Правая панель -->
+            <ScrollViewer Grid.Column="1" 
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled"
+                          Margin="12,0,0,0">
+                <Border Style="{StaticResource CardStyle}" 
+                        Background="White"
+                        Padding="24"
+                        Margin="0,0,0,12">
+                    <StackPanel>
+                        <!-- Заголовок -->
+                        <TextBlock x:Name="txtEditorTitle" 
+                                  Text="Создание нового плана" 
+                                  FontSize="20" 
+                                  FontWeight="Bold"
+                                  Foreground="#1976D2"
+                                  Margin="0,0,0,20"/>
+
+                        <!-- Основная информация -->
+                        <Grid Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" 
+                                      Text="📚 Предмет" 
+                                      Foreground="#757575" 
+                                      FontWeight="SemiBold"
+                                      Margin="0,0,0,6"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" 
+                                      Text="🏫 Класс" 
+                                      Foreground="#757575" 
+                                      FontWeight="SemiBold"
+                                      Margin="10,0,0,6"/>
+
+                            <ComboBox x:Name="cmbSubject" 
+                                     Grid.Row="1" Grid.Column="0"
+                                     Margin="0,0,10,0"
+                                     SelectionChanged="cmbSubject_SelectionChanged"/>
+                            <ComboBox x:Name="cmbClass" 
+                                     Grid.Row="1" Grid.Column="1"
+                                     Margin="10,0,0,0"/>
+                        </Grid>
+
+                        <!-- Тема урока с подсказкой -->
+                        <StackPanel Margin="0,0,0,16">
+                            <TextBlock Text="📖 Тема урока" 
+                                      Foreground="#757575" 
+                                      FontWeight="SemiBold"
+                                      Margin="0,0,0,6"/>
+                            <Grid>
+                                <TextBox x:Name="txtTitle" 
+                                        Height="44"
+                                        BorderBrush="#E0E0E0"
+                                        BorderThickness="1"
+                                        Padding="12,10"
+                                        FontSize="13"
+                                        Background="White"
+                                        TextChanged="txtTitle_TextChanged"/>
+                                <TextBlock x:Name="txtTitleHint" 
+                                          Text="Введите тему урока..."
+                                          Foreground="#BDBDBD"
+                                          FontSize="12"
+                                          VerticalAlignment="Center"
+                                          Margin="12,0,0,0"
+                                          IsHitTestVisible="False"/>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Цель с подсказкой -->
+                        <StackPanel Margin="0,0,0,16">
+                            <TextBlock Text="🎯 Цель урока" 
+                                      Foreground="#757575" 
+                                      FontWeight="SemiBold"
+                                      Margin="0,0,0,6"/>
+                            <Grid>
+                                <TextBox x:Name="txtGoal" 
+                                        Height="80" 
+                                        TextWrapping="Wrap"
+                                        AcceptsReturn="True"
+                                        BorderBrush="#E0E0E0"
+                                        BorderThickness="1"
+                                        Padding="12,10"
+                                        FontSize="13"
+                                        Background="White"
+                                        TextChanged="txtGoal_TextChanged"/>
+                                <TextBlock x:Name="txtGoalHint" 
+                                          Text="Введите цель урока..."
+                                          Foreground="#BDBDBD"
+                                          FontSize="12"
+                                          VerticalAlignment="Top"
+                                          Margin="12,10,0,0"
+                                          IsHitTestVisible="False"/>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Задачи -->
+                        <StackPanel Margin="0,0,0,16">
+                            <TextBlock Text="📋 Задачи" 
+                                      Foreground="#757575" 
+                                      FontWeight="SemiBold"
+                                      Margin="0,0,0,6"/>
+                            <ListView x:Name="lvTasks" 
+                                     Height="100"
+                                     Margin="0,0,0,8"
+                                     BorderBrush="#E0E0E0"
+                                     BorderThickness="1">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="4,2">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="24"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" 
+                                                      Text="•" 
+                                                      FontSize="18" 
+                                                      Foreground="#1976D2"
+                                                      VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1" 
+                                                      Text="{Binding}" 
+                                                      TextWrapping="Wrap" 
+                                                      VerticalAlignment="Center"
+                                                      FontSize="13"/>
+                                            <Button Grid.Column="2" 
+                                                    Content="✕" 
+                                                    Width="28" 
+                                                    Height="28"
+                                                    Background="#F44336"
+                                                    Foreground="White"
+                                                    BorderThickness="0"
+                                                    FontWeight="Bold"
+                                                    FontSize="12"
+                                                    Tag="{Binding}"
+                                                    Click="RemoveTask_Click"
+                                                    Margin="8,0,0,0">
+                                                <Button.Template>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <Border Background="{TemplateBinding Background}"
+                                                                CornerRadius="6"
+                                                                Padding="0">
+                                                            <ContentPresenter HorizontalAlignment="Center" 
+                                                                            VerticalAlignment="Center"/>
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </Button.Template>
+                                            </Button>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid Grid.Column="0">
+                                    <TextBox x:Name="txtNewTask" 
+                                            Height="38"
+                                            BorderBrush="#E0E0E0"
+                                            BorderThickness="1"
+                                            Padding="12,10"
+                                            FontSize="13"
+                                            Background="White"
+                                            TextChanged="txtNewTask_TextChanged"/>
+                                    <TextBlock x:Name="txtNewTaskHint" 
+                                              Text="Введите задачу..."
+                                              Foreground="#BDBDBD"
+                                              FontSize="12"
+                                              VerticalAlignment="Center"
+                                              Margin="12,0,0,0"
+                                              IsHitTestVisible="False"/>
+                                </Grid>
+                                <Button Grid.Column="1" 
+                                        Content="➕ Добавить" 
+                                        Margin="8,0,0,0"
+                                        Padding="16,0"
+                                        Height="38"
+                                        Background="#1976D2"
+                                        Foreground="White"
+                                        BorderThickness="0"
+                                        Style="{StaticResource MainButtonStyle}"
+                                        Click="AddTask_Click"/>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Этапы -->
+                        <StackPanel Margin="0,0,0,16">
+                            <TextBlock Text="📊 Этапы урока" 
+                                      Foreground="#757575" 
+                                      FontWeight="SemiBold"
+                                      Margin="0,0,0,6"/>
+
+                            <ListView x:Name="lvStages" 
+                                     Margin="0,0,0,8"
+                                     MaxHeight="200"
+                                     BorderBrush="#E0E0E0"
+                                     BorderThickness="1">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="#F0F0F0" 
+                                                BorderThickness="0,0,0,1" 
+                                                Padding="12,10">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <StackPanel>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding Name}" 
+                                                                  FontWeight="SemiBold"
+                                                                  FontSize="14"
+                                                                  Foreground="#212121"/>
+                                                        <TextBlock Text=" (" Foreground="#BDBDBD"/>
+                                                        <TextBlock Text="{Binding Duration}" 
+                                                                  Foreground="#1976D2"
+                                                                  FontWeight="SemiBold"/>
+                                                        <TextBlock Text=" мин.)" Foreground="#BDBDBD"/>
+                                                    </StackPanel>
+                                                    <TextBlock Text="{Binding Description}" 
+                                                              Foreground="#424242"
+                                                              FontSize="12"
+                                                              TextWrapping="Wrap"
+                                                              Margin="0,4,0,0"/>
+                                                    <TextBlock Text="{Binding Example}" 
+                                                              Foreground="#757575"
+                                                              FontSize="11"
+                                                              FontStyle="Italic"
+                                                              TextWrapping="Wrap"
+                                                              Margin="0,2,0,0"/>
+                                                </StackPanel>
+
+                                                <Button Grid.Column="1"
+                                                        Content="✕" 
+                                                        Width="28" 
+                                                        Height="28"
+                                                        Background="#F44336"
+                                                        Foreground="White"
+                                                        BorderThickness="0"
+                                                        FontWeight="Bold"
+                                                        FontSize="12"
+                                                        VerticalAlignment="Top"
+                                                        Tag="{Binding}"
+                                                        Click="RemoveStage_Click">
+                                                    <Button.Template>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border Background="{TemplateBinding Background}"
+                                                                    CornerRadius="6"
+                                                                    Padding="0">
+                                                                <ContentPresenter HorizontalAlignment="Center" 
+                                                                                VerticalAlignment="Center"/>
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Button.Template>
+                                                </Button>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+
+                            <Border Background="#F5F7FA" 
+                                    Padding="16" 
+                                    CornerRadius="8"
+                                    BorderBrush="#E8E8E8"
+                                    BorderThickness="1">
+                                <StackPanel>
+                                    <TextBlock Text="➕ Добавить этап" 
+                                              FontWeight="SemiBold"
+                                              Foreground="#1976D2"
+                                              Margin="0,0,0,10"/>
+
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="100"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Название этапа с подсказкой -->
+                                        <Grid Grid.Column="0">
+                                            <TextBox x:Name="txtStageName" 
+                                                    Height="38"
+                                                    BorderBrush="#E0E0E0"
+                                                    BorderThickness="1"
+                                                    Padding="12,10"
+                                                    FontSize="13"
+                                                    Background="White"
+                                                    TextChanged="txtStageName_TextChanged"/>
+                                            <TextBlock x:Name="txtStageNameHint" 
+                                                      Text="📌 Название этапа..."
+                                                      Foreground="#BDBDBD"
+                                                      FontSize="12"
+                                                      VerticalAlignment="Center"
+                                                      Margin="12,0,0,0"
+                                                      IsHitTestVisible="False"/>
+                                        </Grid>
+
+                                        <!-- Длительность с подсказкой -->
+                                        <Grid Grid.Column="1" Margin="8,0,0,0">
+                                            <TextBox x:Name="txtStageDuration" 
+                                                    Height="38"
+                                                    BorderBrush="#E0E0E0"
+                                                    BorderThickness="1"
+                                                    Padding="12,10"
+                                                    FontSize="13"
+                                                    Background="White"
+                                                    Text="5"
+                                                    TextChanged="txtStageDuration_TextChanged"/>
+                                            <TextBlock x:Name="txtStageDurationHint" 
+                                                      Text="⏱ мин."
+                                                      Foreground="#BDBDBD"
+                                                      FontSize="12"
+                                                      VerticalAlignment="Center"
+                                                      Margin="12,0,0,0"
+                                                      IsHitTestVisible="False"
+                                                      Visibility="Collapsed"/>
+                                        </Grid>
+                                    </Grid>
+
+                                    <!-- Описание с подсказкой -->
+                                    <Grid Margin="0,0,0,8">
+                                        <TextBox x:Name="txtStageDescription" 
+                                                Height="38"
+                                                BorderBrush="#E0E0E0"
+                                                BorderThickness="1"
+                                                Padding="12,10"
+                                                FontSize="13"
+                                                Background="White"
+                                                TextChanged="txtStageDescription_TextChanged"/>
+                                        <TextBlock x:Name="txtStageDescriptionHint" 
+                                                  Text="📝 Описание этапа..."
+                                                  Foreground="#BDBDBD"
+                                                  FontSize="12"
+                                                  VerticalAlignment="Center"
+                                                  Margin="12,0,0,0"
+                                                  IsHitTestVisible="False"/>
+                                    </Grid>
+
+                                    <!-- Пример с подсказкой -->
+                                    <Grid Margin="0,0,0,8">
+                                        <TextBox x:Name="txtStageExample" 
+                                                Height="38"
+                                                BorderBrush="#E0E0E0"
+                                                BorderThickness="1"
+                                                Padding="12,10"
+                                                FontSize="13"
+                                                Background="White"
+                                                TextChanged="txtStageExample_TextChanged"/>
+                                        <TextBlock x:Name="txtStageExampleHint" 
+                                                  Text="💡 Пример..."
+                                                  Foreground="#BDBDBD"
+                                                  FontSize="12"
+                                                  VerticalAlignment="Center"
+                                                  Margin="12,0,0,0"
+                                                  IsHitTestVisible="False"/>
+                                    </Grid>
+
+                                    <Button x:Name="btnAddStage" 
+                                            Content="➕ Добавить этап" 
+                                            Height="38"
+                                            Background="#1976D2"
+                                            Foreground="White"
+                                            BorderThickness="0"
+                                            Style="{StaticResource MainButtonStyle}"
+                                            Click="AddStage_Click"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- Файлы ФГОС -->
+                        <Border Background="#F5F7FA" 
+                                Padding="16" 
+                                CornerRadius="8"
+                                BorderBrush="#E8E8E8"
+                                BorderThickness="1"
+                                Margin="0,0,0,16">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                    <TextBlock Text="📁 Файлы ФГОС" 
+                                               FontWeight="SemiBold" 
+                                               Foreground="#1976D2"
+                                               FontSize="15"/>
+                                    <TextBlock Text=" (для данного предмета)" 
+                                               Foreground="#757575"
+                                               FontSize="12"
+                                               Margin="8,0,0,0"/>
+                                </StackPanel>
+
+                                <ListView x:Name="lvAvailableFgosFiles" 
+                                         Height="120"
+                                         Margin="0,0,0,8"
+                                         BorderBrush="#E0E0E0"
+                                         BorderThickness="1"
+                                         SelectionMode="Multiple">
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Padding="6" Background="Transparent">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <CheckBox Grid.Column="0"
+                                                              IsChecked="{Binding IsSelected}"
+                                                              Margin="0,0,10,0"
+                                                              VerticalAlignment="Center"/>
+
+                                                    <StackPanel Grid.Column="1">
+                                                        <TextBlock Text="{Binding FileName}" 
+                                                                  FontWeight="SemiBold"
+                                                                  FontSize="12"
+                                                                  TextWrapping="Wrap"/>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Text="{Binding GradeLevel}" 
+                                                                      Foreground="#4CAF50"
+                                                                      FontSize="10"/>
+                                                            <TextBlock Text=" · " Foreground="#BDBDBD" FontSize="10"/>
+                                                            <TextBlock Text="{Binding Variant}" 
+                                                                      Foreground="#FF9800"
+                                                                      FontSize="10"/>
+                                                            <TextBlock Text=" · " Foreground="#BDBDBD" FontSize="10"/>
+                                                            <TextBlock Text="{Binding FileSizeDisplay}" 
+                                                                      Foreground="#757575"
+                                                                      FontSize="10"/>
+                                                        </StackPanel>
+                                                        <TextBlock Text="{Binding Description}" 
+                                                                  Foreground="#BDBDBD"
+                                                                  FontSize="10"
+                                                                  TextWrapping="Wrap"
+                                                                  MaxHeight="20"/>
+                                                    </StackPanel>
+
+                                                    <Button Grid.Column="2"
+                                                            Content="📥"
+                                                            Width="28"
+                                                            Height="28"
+                                                            Background="#1976D2"
+                                                            Foreground="White"
+                                                            BorderThickness="0"
+                                                            Margin="8,0,0,0"
+                                                            FontSize="14"
+                                                            Tag="{Binding}"
+                                                            Click="btnDownloadFgosFile_Click"
+                                                            ToolTip="Скачать">
+                                                        <Button.Template>
+                                                            <ControlTemplate TargetType="Button">
+                                                                <Border Background="{TemplateBinding Background}"
+                                                                        CornerRadius="6"
+                                                                        Padding="0">
+                                                                    <ContentPresenter HorizontalAlignment="Center" 
+                                                                                    VerticalAlignment="Center"/>
+                                                                </Border>
+                                                            </ControlTemplate>
+                                                        </Button.Template>
+                                                    </Button>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
+
+                                <!-- Прикрепленные файлы -->
+                                <TextBlock Text="📎 Прикрепленные:" 
+                                           Foreground="#757575"
+                                           FontWeight="SemiBold"
+                                           FontSize="12"
+                                           Margin="0,4,0,4"/>
+
+                                <ListView x:Name="lvAttachedFgosFiles" 
+                                         Height="80"
+                                         Margin="0,0,0,8"
+                                         BorderBrush="#E0E0E0"
+                                         BorderThickness="1">
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Padding="6">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <StackPanel Grid.Column="0">
+                                                        <TextBlock Text="{Binding FileName}" 
+                                                                  FontWeight="SemiBold"
+                                                                  FontSize="12"
+                                                                  TextWrapping="Wrap"/>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Text="{Binding GradeLevel}" 
+                                                                      Foreground="#4CAF50"
+                                                                      FontSize="10"/>
+                                                            <TextBlock Text=" · " Foreground="#BDBDBD" FontSize="10"/>
+                                                            <TextBlock Text="{Binding Variant}" 
+                                                                      Foreground="#FF9800"
+                                                                      FontSize="10"/>
+                                                        </StackPanel>
+                                                    </StackPanel>
+
+                                                    <Button Grid.Column="1"
+                                                            Content="✕"
+                                                            Width="24"
+                                                            Height="24"
+                                                            Background="#F44336"
+                                                            Foreground="White"
+                                                            BorderThickness="0"
+                                                            FontSize="10"
+                                                            FontWeight="Bold"
+                                                            Tag="{Binding}"
+                                                            Click="btnRemoveAttachedFile_Click"
+                                                            ToolTip="Открепить">
+                                                        <Button.Template>
+                                                            <ControlTemplate TargetType="Button">
+                                                                <Border Background="{TemplateBinding Background}"
+                                                                        CornerRadius="6"
+                                                                        Padding="0">
+                                                                    <ContentPresenter HorizontalAlignment="Center" 
+                                                                                    VerticalAlignment="Center"/>
+                                                                </Border>
+                                                            </ControlTemplate>
+                                                        </Button.Template>
+                                                    </Button>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
+
+                                <StackPanel Orientation="Horizontal" 
+                                            HorizontalAlignment="Right"
+                                            Margin="0,4,0,0">
+                                    <Button x:Name="btnAttachFiles" 
+                                           Content="📎 Прикрепить" 
+                                           Style="{StaticResource MainButtonStyle}"
+                                           Background="#1976D2"
+                                           Padding="14,8"
+                                           Click="btnAttachFiles_Click"/>
+                                    <Button x:Name="btnRefreshFiles" 
+                                           Content="🔄" 
+                                           Style="{StaticResource MainButtonStyle}"
+                                           Background="#78909C"
+                                           Padding="10,8"
+                                           Margin="8,0,0,0"
+                                           Width="40"
+                                           Click="btnRefreshFiles_Click"/>
+                                    <Button x:Name="btnManageFgosFiles" 
+                                           Content="📁 Управление" 
+                                           Style="{StaticResource MainButtonStyle}"
+                                           Background="#9C27B0"
+                                           Padding="14,8"
+                                           Margin="8,0,0,0"
+                                           Click="btnManageFgosFiles_Click"
+                                           Visibility="Collapsed"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Панель УВР -->
+                        <Border x:Name="uvrCommentsPanel" 
+                                Background="#FFF8E1" 
+                                Padding="16" 
+                                CornerRadius="8"
+                                BorderBrush="#FFE0B2"
+                                BorderThickness="1"
+                                Margin="0,0,0,16"
+                                Visibility="Collapsed">
+                            <StackPanel>
+                                <TextBlock Text="🔍 Проверка плана" 
+                                          FontWeight="Bold" 
+                                          Foreground="#FF9800"
+                                          FontSize="15"
+                                          Margin="0,0,0,8"/>
+
+                                <Grid>
+                                    <TextBox x:Name="txtUvrComment" 
+                                            Height="60"
+                                            Padding="12"
+                                            TextWrapping="Wrap"
+                                            AcceptsReturn="True"
+                                            BorderBrush="#E0E0E0"
+                                            BorderThickness="1"
+                                            FontSize="13"
+                                            Background="White"
+                                            TextChanged="txtUvrComment_TextChanged"/>
+                                    <TextBlock x:Name="txtUvrCommentHint" 
+                                              Text="Введите комментарий..."
+                                              Foreground="#BDBDBD"
+                                              FontSize="12"
+                                              VerticalAlignment="Top"
+                                              Margin="12,10,0,0"
+                                              IsHitTestVisible="False"/>
+                                </Grid>
+
+                                <Grid Margin="0,8,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Button Grid.Column="0" 
+                                            Content="✅ Утвердить" 
+                                            Padding="16,10"
+                                            Background="#4CAF50"
+                                            Foreground="White"
+                                            BorderThickness="0"
+                                            Margin="0,0,6,0"
+                                            Style="{StaticResource MainButtonStyle}"
+                                            Click="btnApprovePlan_Click"/>
+
+                                    <Button Grid.Column="1" 
+                                            Content="↩️ На доработку" 
+                                            Padding="16,10"
+                                            Background="#F44336"
+                                            Foreground="White"
+                                            BorderThickness="0"
+                                            Margin="6,0,0,0"
+                                            Style="{StaticResource MainButtonStyle}"
+                                            Click="btnRejectPlan_Click"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Кнопки действий -->
+                        <StackPanel Orientation="Horizontal" 
+                                   HorizontalAlignment="Right" 
+                                   Margin="0,8">
+                            <!-- Для учителя -->
+                            <StackPanel x:Name="teacherButtons" 
+                                       Orientation="Horizontal" 
+                                       Visibility="Visible">
+                                <Button x:Name="btnSavePlan" 
+                                       Content="💾 Сохранить" 
+                                       Style="{StaticResource MainButtonStyle}"
+                                       Background="#1976D2"
+                                       Padding="20,10"
+                                       Click="btnSavePlan_Click"/>
+
+                                <Button x:Name="btnSendToCheck" 
+                                       Content="📤 Отправить" 
+                                       Style="{StaticResource MainButtonStyle}"
+                                       Background="#FF9800"
+                                       Padding="20,10"
+                                       Margin="8,0,0,0"
+                                       Click="btnSendToCheck_Click"/>
+                            </StackPanel>
+
+                            <!-- Для УВР -->
+                            <StackPanel x:Name="uvrButtons" 
+                                       Orientation="Horizontal" 
+                                       Visibility="Collapsed">
+                                <Button x:Name="btnEditPlan" 
+                                       Content="✏ Редактировать" 
+                                       Style="{StaticResource MainButtonStyle}"
+                                       Background="#1976D2"
+                                       Padding="20,10"
+                                       Click="btnEditPlan_Click"/>
+
+                                <Button x:Name="btnDeletePlan" 
+                                       Content="🗑️ Удалить" 
+                                       Style="{StaticResource MainButtonStyle}"
+                                       Background="#F44336"
+                                       Padding="20,10"
+                                       Margin="8,0,0,0"
+                                       Click="btnDeletePlan_Click"/>
+                            </StackPanel>
+
+                            <!-- Общая кнопка PDF -->
+                            <Button x:Name="btnExportPdf" 
+                                   Content="📄 PDF" 
+                                   Style="{StaticResource MainButtonStyle}"
+                                   Background="#9C27B0"
+                                   Padding="20,10"
+                                   Margin="8,0,0,0"
+                                   Click="btnExportPdf_Click"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</Page>
