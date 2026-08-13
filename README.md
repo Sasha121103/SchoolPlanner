@@ -27,7 +27,7 @@
 | Бизнес-логика | C#, .NET Framework |
 | Данные | MySQL |
 | Библиотеки | MySql.Data, iTextSharp (PDF) |
-| Инструменты | Visual Studio, Git, phpMyAdmin, XAMPP |
+| Инструменты | Visual Studio, phpMyAdmin, |
  
 ## Архитектура
  
@@ -79,7 +79,7 @@ SchoolPlanner/
  
 ## Установка и запуск
  
-1. Установите [XAMPP](https://www.apachefriends.org/) (или отдельно MySQL) и разверните сервер
+1. Установите  MySQL и разверните сервер
 2. Импортируйте схему базы данных через phpMyAdmin
 3. Клонируйте репозиторий и откройте решение в Visual Studio
 4. Укажите строку подключения к MySQL (сервер, порт, БД, пользователь, пароль) в конфигурации `DbHelper`
